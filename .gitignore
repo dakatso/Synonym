@@ -1,0 +1,10 @@
+.gradle
+.idea
+local.properties
+build
+*.iml
+*.hprof
+projectFilesBackup*
+!.idea/codeStyles
+!.idea/dictionaries
+!.idea/inspectionProfiles

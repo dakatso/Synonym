@@ -1,0 +1,12 @@
+<!--@formatter:off-->
+<resources>
+    <string name="app_name">Synonym</string>
+
+    <string name="app_navigation_tasks">Задачи</string>
+    <string name="app_navigation_settings">Настройки</string>
+
+    <!--auth-->
+    <string name="auth_password_hint">Пароль</string>
+    <string name="auth_account_hint">Учетная запись</string>
+    <string name="auth_address_hint">Адрес</string>
+</resources>
