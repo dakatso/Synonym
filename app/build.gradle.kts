@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-android-extensions")
     id("kotlin-kapt")
 }
 
@@ -50,14 +49,14 @@ dependencies {
     implementation("com.bluelinelabs:conductor-support:2.1.5")
     implementation("com.bluelinelabs:conductor-archlifecycle:2.1.5")
 
-    implementation("io.reactivex.rxjava2:rxjava:2.2.3")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.4")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.0")
     implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
     implementation("com.jakewharton.rxbinding2:rxbinding:2.2.0")
 
-    implementation("com.squareup.retrofit2:retrofit:2.4.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.4.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.4.0")
+    implementation("com.squareup.retrofit2:retrofit:2.5.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.5.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.5.0")
     implementation("com.squareup.okhttp3:okhttp:3.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:3.12.0")
     implementation("com.google.code.gson:gson:2.8.5")
