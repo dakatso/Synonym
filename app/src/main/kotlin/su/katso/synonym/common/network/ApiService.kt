@@ -1,12 +1,12 @@
 package su.katso.synonym.common.network
 
-import com.google.gson.JsonObject
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 import su.katso.synonym.common.entities.ApiMethod
 import su.katso.synonym.common.entities.AuthInfo
 import su.katso.synonym.common.entities.EncryptionInfo
+import su.katso.synonym.common.entities.TaskAction
 import su.katso.synonym.common.entities.TaskInfo
 
 interface ApiService {
@@ -24,7 +24,7 @@ interface ApiService {
     fun taskList(@QueryMap params: Map<String, String>): Single<TaskInfo>
 
     @GET("DownloadStation/task.cgi")
-    fun taskPause(@QueryMap params: Map<String, String>): Single<List<JsonObject>>
+    fun taskPause(@QueryMap params: Map<String, String>): Single<List<TaskAction>>
 
     object BaseParams {
         const val API: String = "api"

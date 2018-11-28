@@ -11,8 +11,8 @@ import su.katso.synonym.common.entities.Task.Status
 
 class TaskViewObject(task: Task) {
     val id: String = task.id
-    val status: Status = task.status
-    val title: String = task.title
+    var status: Status = task.status
+    var title: String = task.title
 }
 
 class TaskViewHolder(parent: ViewGroup) : WrapperViewHolder(parent) {
@@ -32,9 +32,10 @@ class TaskViewHolder(parent: ViewGroup) : WrapperViewHolder(parent) {
                 Status.PAUSED -> R.drawable.ic_tasks_status_pause
                 Status.SEEDING -> R.drawable.ic_tasks_status_seeding
                 Status.HASH_CHECKING -> R.drawable.ic_tasks_status_checking
+                Status.WAITING -> R.drawable.ic_tasks_status_waiting
                 Status.DOWNLOADING -> R.drawable.ic_tasks_status_downloading
                 Status.ERROR -> R.drawable.ic_tasks_status_error
-                else -> R.drawable.ic_tasks_status_error
+                else -> R.drawable.ic_tasks_status_waiting
             }
         )
 
