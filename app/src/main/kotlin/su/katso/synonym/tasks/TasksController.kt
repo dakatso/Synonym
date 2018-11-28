@@ -1,41 +1,78 @@
 package su.katso.synonym.tasks
 
-import android.view.LayoutInflater
+import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
-import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
-import com.bluelinelabs.conductor.archlifecycle.LifecycleController
-import org.koin.standalone.KoinComponent
+import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bluelinelabs.conductor.RouterTransaction
 import su.katso.synonym.R
+import su.katso.synonym.common.arch.BaseController
+import su.katso.synonym.common.arch.PresentationModel.Command
+import su.katso.synonym.common.arch.ToastCommand
+import su.katso.synonym.common.utils.klog
+import su.katso.synonym.settings.SettingsController
+import su.katso.synonym.tasks.adapter.TasksAdapter
 
-class TasksController : LifecycleController(), KoinComponent {
+class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), TasksViewController {
+    override val content: Int = R.layout.tasks_controller
+    override val presentationModel = TasksPresentationModel()
+        .also { it.bindToLifecycle(this) }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): android.view.View {
-        return inflater.inflate(R.layout.task_controller, container, false)
-            .apply { initView() }
+    private lateinit var adapter: TasksAdapter
+    private lateinit var progressBar: ProgressBar
+    private lateinit var rvTasks: RecyclerView
+
+    override fun View.initView() {
+
+        with(findViewById<Toolbar>(R.id.toolbar)) {
+            inflateMenu(R.menu.menu_tasks)
+            setOnMenuItemClickListener(::onOptionsItemSelected)
+        }
+
+        rvTasks = findViewById(R.id.rvTasks)
+
+        adapter = TasksAdapter()
+        rvTasks.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        rvTasks.adapter = adapter
+
+        progressBar = findViewById(R.id.progressBar)
     }
 
-    private fun View.initView() {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_settings) {
 
-        val bottomNavigation = findViewById<AHBottomNavigation>(R.id.bottomNavigation)
-        bottomNavigation.titleState = AHBottomNavigation.TitleState.ALWAYS_SHOW
+            router.pushController(
+                RouterTransaction.with(SettingsController())
+            )
 
-        bottomNavigation.addItem(
-            AHBottomNavigationItem(
-                R.string.app_navigation_tasks,
-                R.drawable.abc_ic_menu_share_mtrl_alpha,
-                R.color.primary
-            )
-        )
-        bottomNavigation.addItem(
-            AHBottomNavigationItem(
-                R.string.app_navigation_settings,
-                R.drawable.abc_ic_menu_share_mtrl_alpha,
-                R.color.primary
-            )
-        )
-        bottomNavigation.isColored = true
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun itemRecycleView() = adapter.clickSubject
+
+    override fun render(viewState: TasksViewState) {
+
+        klog(Log.DEBUG, viewState)
+
+        adapter.setItems(viewState.tasks)
+        adapter.notifyDataSetChanged()
+
+        progressBar.isVisible = viewState.isLoading
+        rvTasks.isVisible = !viewState.isLoading
+    }
+
+    override fun react(command: Command) {
+        when (command) {
+            is ToastCommand -> Toast.makeText(applicationContext, command.text, Toast.LENGTH_LONG).show()
+        }
     }
 }
 

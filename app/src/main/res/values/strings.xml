@@ -9,4 +9,11 @@
     <string name="auth_password_hint">Пароль</string>
     <string name="auth_account_hint">Учетная запись</string>
     <string name="auth_address_hint">Адрес</string>
+
+     <!--downloads-->
+    <string name="tasks_title">Задачи</string>
+
+    <!--setting-->
+    <string name="setting_title">Настройки</string>
+
 </resources>

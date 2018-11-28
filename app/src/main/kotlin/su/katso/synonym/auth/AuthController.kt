@@ -1,28 +1,28 @@
 package su.katso.synonym.auth
 
+import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.Observable
 import su.katso.synonym.R
-import su.katso.synonym.auth.AuthPresentationModel.KeyboardCommand
 import su.katso.synonym.auth.AuthPresentationModel.LoginParams
 import su.katso.synonym.auth.AuthPresentationModel.OpenTasksCommand
-import su.katso.synonym.auth.AuthPresentationModel.ToastCommand
 import su.katso.synonym.common.arch.BaseController
+import su.katso.synonym.common.arch.HideKeyboardCommand
 import su.katso.synonym.common.arch.PresentationModel.Command
+import su.katso.synonym.common.arch.ToastCommand
 import su.katso.synonym.common.utils.hideKeyboard
-import su.katso.synonym.common.utils.klog
+import su.katso.synonym.common.utils.setError
 import su.katso.synonym.tasks.TasksController
 
-class AuthController : BaseController(), AuthViewController {
+class AuthController(args: Bundle = Bundle.EMPTY) : BaseController(args), AuthViewController {
     override val content = R.layout.auth_controller
     override val presentationModel = AuthPresentationModel()
-        .also { it.bind(this) }
+        .also { it.bindToLifecycle(this) }
 
     private lateinit var btnLogin: Button
     private lateinit var etAddress: TextInputLayout
@@ -37,27 +37,16 @@ class AuthController : BaseController(), AuthViewController {
     }
 
     override fun buttonLogin(): Observable<LoginParams> {
-        fun TextInputLayout.getText() = editText?.text?.toString() ?: ""
+        fun TextInputLayout.getText() = editText?.text?.toString().orEmpty()
 
         return RxView.clicks(btnLogin)
             .map { LoginParams(etAddress.getText(), etAccount.getText(), etPassword.getText()) }
     }
 
     override fun render(viewState: AuthViewState) {
-        klog(viewState)
-        with(btnLogin) {
-            setBackgroundColor(
-                ContextCompat.getColor(
-                    context,
-                    if (viewState.isLoading) android.R.color.holo_blue_light
-                    else android.R.color.darker_gray
-                )
-            )
-        }
-
-        etAddress.error = if (viewState.isAddressError) " " else ""
-        etAccount.error = if (viewState.isAccountsError) " " else ""
-        etPassword.error = if (viewState.isPasswordError) " " else ""
+        etAddress.setError(viewState.isAddressError)
+        etAccount.setError(viewState.isAccountsError)
+        etPassword.setError(viewState.isPasswordError)
     }
 
     override fun react(command: Command) {
@@ -68,11 +57,10 @@ class AuthController : BaseController(), AuthViewController {
                 }
             }
             is OpenTasksCommand -> {
-                router.popCurrentController()
-                router.pushController(RouterTransaction.with(TasksController()))
+                router.setRoot(RouterTransaction.with(TasksController()))
             }
 
-            is KeyboardCommand -> hideKeyboard()
+            is HideKeyboardCommand -> hideKeyboard()
         }
     }
 }

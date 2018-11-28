@@ -1,5 +1,6 @@
 package su.katso.synonym.common.network
 
+import com.google.gson.JsonObject
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
@@ -20,7 +21,10 @@ interface ApiService {
     fun auth(@QueryMap params: Map<String, String>): Single<AuthInfo>
 
     @GET("DownloadStation/task.cgi")
-    fun task(@QueryMap params: Map<String, String>): Single<TaskInfo>
+    fun taskList(@QueryMap params: Map<String, String>): Single<TaskInfo>
+
+    @GET("DownloadStation/task.cgi")
+    fun taskPause(@QueryMap params: Map<String, String>): Single<List<JsonObject>>
 
     object BaseParams {
         const val API: String = "api"
@@ -39,6 +43,7 @@ interface ApiService {
     }
 
     object TaskParams {
+        const val ID: String = "id"
         const val ADDITIONAL: String = "additional"
         const val LIMIT: String = "limit"
         const val OFFSET: String = "offset"

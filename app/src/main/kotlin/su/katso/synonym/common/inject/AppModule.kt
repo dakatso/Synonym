@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import okhttp3.logging.HttpLoggingInterceptor.Level.BASIC
+import okhttp3.logging.HttpLoggingInterceptor.Level.BODY
 import okhttp3.logging.HttpLoggingInterceptor.Level.NONE
 import org.koin.dsl.module.Module
 import org.koin.dsl.module.module
@@ -18,22 +18,22 @@ import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ErrorInterceptor
 
 val appModule: Module = module {
-    single { get<Context>().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE); }
+    single { get<Context>().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE) }
     single { GsonBuilder().serializeNulls().create() }
 
     scope(SESSION_SCOPE) {
         OkHttpClient.Builder()
             .addInterceptor(ErrorInterceptor())
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG) BASIC else NONE
+                level = if (BuildConfig.DEBUG) BODY else NONE
             })
             .build()
     }
 
     scope(SESSION_SCOPE) {
         HttpUrl.Builder()
-            .scheme(get<SharedPreferences>().getString(PREF_SCHEME, "") ?: "")
-            .host(get<SharedPreferences>().getString(PREF_BASE_URL, "") ?: "")
+            .scheme(get<SharedPreferences>().getString(PREF_SCHEME, "").orEmpty())
+            .host(get<SharedPreferences>().getString(PREF_BASE_URL, "").orEmpty())
             .addPathSegments("webapi/")
             .port(5000)
             .build()

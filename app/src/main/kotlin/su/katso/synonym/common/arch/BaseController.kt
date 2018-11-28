@@ -1,12 +1,13 @@
 package su.katso.synonym.common.arch
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.archlifecycle.LifecycleController
 import org.koin.standalone.KoinComponent
 
-abstract class BaseController : LifecycleController(), KoinComponent {
+abstract class BaseController(args: Bundle) : LifecycleController(args), KoinComponent {
     abstract val content: Int
     abstract val presentationModel: BasePresentationModel<*, *>
 

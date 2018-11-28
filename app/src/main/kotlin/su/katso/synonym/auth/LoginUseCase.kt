@@ -1,10 +1,13 @@
 package su.katso.synonym.auth
 
+import android.content.SharedPreferences
 import android.util.Base64
+import androidx.core.content.edit
+import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import su.katso.synonym.common.arch.SingleUseCase
+import su.katso.synonym.common.arch.CompletableUseCase
 import su.katso.synonym.common.entities.AuthInfo
 import su.katso.synonym.common.entities.EncryptionInfo
 import su.katso.synonym.common.network.ApiException
@@ -19,16 +22,19 @@ import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
 class LoginUseCase(
+    private val preferences: SharedPreferences,
     private val api: ApiService,
     private val account: String,
     private val password: String
-) : SingleUseCase<AuthInfo>() {
+) : CompletableUseCase() {
 
-    override val single: Single<AuthInfo> = query()
+    override val completable: Completable = query()
         .flatMap {
             if (it.containsKey(Api.ENCRYPTION)) encryption()
             else Single.error(ApiException(104))
-        }.flatMap { auth(it, account, password) }
+        }
+        .flatMap { auth(it, account, password) }
+        .flatMapCompletable { saveSid(it.sid) }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
 
@@ -62,6 +68,14 @@ class LoginUseCase(
                 AuthParams.SESSION to "DownloadStation"
             )
         )
+    }
+
+    private fun saveSid(sid: String): Completable {
+        return Completable.fromCallable {
+            preferences.edit(true) {
+                putString(AuthPresentationModel.PREF_SID, sid)
+            }
+        }
     }
 
     private fun encrypt(account: String, password: String, info: EncryptionInfo): String {

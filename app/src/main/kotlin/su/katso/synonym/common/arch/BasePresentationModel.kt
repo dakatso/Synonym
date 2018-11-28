@@ -27,10 +27,12 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
     private val valve = PublishSubject.create<Boolean>()
     private val commandsValve = commands.valve(valve)
 
-    fun bind(lifecycleController: C) {
+    private var isFirstBind = true
+
+    fun bindToLifecycle(lifecycleController: C) {
         lifecycleController.lifecycle.addObserver(object : LifecycleObserver {
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            private fun resume() = onBind(lifecycleController)
+            private fun resume() = onBindController(lifecycleController)
 
             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             private fun pause() = onUnbind()
@@ -40,7 +42,7 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
         })
     }
 
-    private fun onBind(viewController: C) {
+    private fun onBindController(viewController: C) {
         viewState
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { viewController.render(it) }
@@ -52,7 +54,12 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
             .addTo(unBindDisposable)
 
         valve.onNext(true)
-        intents(viewController)
+
+        if (isFirstBind) {
+            onFirstBind(viewController)
+            isFirstBind = false
+        }
+        onBind(viewController)
     }
 
     private fun onUnbind() {
@@ -68,11 +75,11 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
         onDestroy()
     }
 
+    protected abstract fun onBind(viewController: C)
+    protected open fun onFirstBind(viewController: C) {}
     protected open fun onDestroy() {}
 
-    abstract fun intents(viewController: C)
-
-    protected fun <T> intent(observable: Observable<T>, onNext: (T) -> Unit) {
+    protected fun <T> bindTo(observable: Observable<T>, onNext: (T) -> Unit) {
         observable.subscribe(onNext).addTo(unBindDisposable)
     }
 
@@ -93,6 +100,15 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
         onError: ((Throwable) -> Unit)? = null
     ) {
         subscribe(onStart, onNext, onComplete, onError)
+            .addTo(onClearDisposable)
+    }
+
+    protected fun CompletableUseCase.interact(
+        onStart: (() -> Unit)? = null,
+        onComplete: (() -> Unit)? = null,
+        onError: ((Throwable) -> Unit)? = null
+    ) {
+        subscribe(onStart, onComplete, onError)
             .addTo(onClearDisposable)
     }
 

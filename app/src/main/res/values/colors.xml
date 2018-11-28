@@ -3,4 +3,10 @@
     <color name="primary">#29475f</color>
     <color name="primary_dark">#1f3749</color>
     <color name="accent">#2196f3</color>
+    <color name="accent2">#115543</color>
+    <color name="tab_text">#acffffff</color>
+    <color name="tab_text_selected">#f3ffffff</color>
+    
+    <color name="text_primary">#ac000000</color>
+    <color name="text_primary_light">#ffffff</color>
 </resources>

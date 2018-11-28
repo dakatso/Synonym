@@ -5,7 +5,9 @@ import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.IntRange
 import com.bluelinelabs.conductor.Controller
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 import retrofit2.HttpException
 import su.katso.synonym.BuildConfig
 
@@ -16,9 +18,17 @@ fun Controller.hideKeyboard() {
     }
 }
 
+fun TextInputLayout.setError(isError: Boolean) {
+    error = if (isError) " " else ""
+}
+
 fun Throwable.getError() = (this as? HttpException)
     ?.response()?.errorBody()?.string()?.let {
-        JsonParser().parse(it).asJsonObject.getAsJsonPrimitive("code").asInt
+        try {
+            JsonParser().parse(it).asJsonObject.getAsJsonPrimitive("code").asInt
+        } catch (e: JsonSyntaxException) {
+            null
+        }
     }
 
 @Suppress("NOTHING_TO_INLINE")
