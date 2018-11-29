@@ -9,6 +9,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.Observable
 import su.katso.synonym.R
+import su.katso.synonym.auth.AuthPresentationModel.FillInputsCommand
 import su.katso.synonym.auth.AuthPresentationModel.LoginParams
 import su.katso.synonym.auth.AuthPresentationModel.OpenTasksCommand
 import su.katso.synonym.common.arch.BaseController
@@ -25,28 +26,28 @@ class AuthController(args: Bundle = Bundle.EMPTY) : BaseController(args), AuthVi
         .also { it.bindToLifecycle(this) }
 
     private lateinit var btnLogin: Button
-    private lateinit var etAddress: TextInputLayout
-    private lateinit var etAccount: TextInputLayout
-    private lateinit var etPassword: TextInputLayout
+    private lateinit var tilAddress: TextInputLayout
+    private lateinit var tilAccount: TextInputLayout
+    private lateinit var tilPassword: TextInputLayout
 
     override fun View.initView() {
         btnLogin = findViewById(R.id.btnLogin)
-        etAddress = findViewById(R.id.etAddress)
-        etAccount = findViewById(R.id.etAccount)
-        etPassword = findViewById(R.id.etPassword)
+        tilAddress = findViewById(R.id.tilAddress)
+        tilAccount = findViewById(R.id.tilAccount)
+        tilPassword = findViewById(R.id.tilPassword)
     }
 
     override fun buttonLogin(): Observable<LoginParams> {
         fun TextInputLayout.getText() = editText?.text?.toString().orEmpty()
 
         return RxView.clicks(btnLogin)
-            .map { LoginParams(etAddress.getText(), etAccount.getText(), etPassword.getText()) }
+            .map { LoginParams(tilAddress.getText(), tilAccount.getText(), tilPassword.getText()) }
     }
 
     override fun render(viewState: AuthViewState) {
-        etAddress.setError(viewState.isAddressError)
-        etAccount.setError(viewState.isAccountsError)
-        etPassword.setError(viewState.isPasswordError)
+        tilAddress.setError(viewState.isAddressError)
+        tilAccount.setError(viewState.isAccountError)
+        tilPassword.setError(viewState.isPasswordError)
     }
 
     override fun react(command: Command) {
@@ -61,8 +62,18 @@ class AuthController(args: Bundle = Bundle.EMPTY) : BaseController(args), AuthVi
             }
 
             is HideKeyboardCommand -> hideKeyboard()
+
+            is FillInputsCommand -> {
+                tilAddress.text = command.loginParams.address
+                tilAccount.text = command.loginParams.account
+                tilPassword.text = command.loginParams.password
+            }
         }
     }
+
+    private var TextInputLayout.text: String
+        get() = editText?.text?.toString().orEmpty()
+        set(value) = editText?.setText(value) ?: Unit
 }
 
 

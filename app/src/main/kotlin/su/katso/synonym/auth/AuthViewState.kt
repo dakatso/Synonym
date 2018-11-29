@@ -5,6 +5,6 @@ import su.katso.synonym.common.arch.PresentationModel.ViewState
 data class AuthViewState(
     var isLoading: Boolean = false,
     var isAddressError: Boolean = false,
-    var isAccountsError: Boolean = false,
+    var isAccountError: Boolean = false,
     var isPasswordError: Boolean = false
 ) : ViewState

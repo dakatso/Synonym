@@ -7,9 +7,15 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import su.katso.synonym.auth.AuthPresentationModel.LoginParams
+import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ACCOUNT
+import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ADDRESS
+import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_PASSWORD
 import su.katso.synonym.common.arch.CompletableUseCase
 import su.katso.synonym.common.entities.AuthInfo
 import su.katso.synonym.common.entities.EncryptionInfo
+import su.katso.synonym.common.inject.PREF_BASE_URL
+import su.katso.synonym.common.inject.PREF_SCHEME
 import su.katso.synonym.common.network.ApiException
 import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ApiService.Api
@@ -24,8 +30,7 @@ import javax.crypto.Cipher
 class LoginUseCase(
     private val preferences: SharedPreferences,
     private val api: ApiService,
-    private val account: String,
-    private val password: String
+    private val params: LoginParams
 ) : CompletableUseCase() {
 
     override val completable: Completable = query()
@@ -33,8 +38,9 @@ class LoginUseCase(
             if (it.containsKey(Api.ENCRYPTION)) encryption()
             else Single.error(ApiException(104))
         }
-        .flatMap { auth(it, account, password) }
+        .flatMap { auth(it, params.account, params.password) }
         .flatMapCompletable { saveSid(it.sid) }
+        .andThen(saveLoginParams(params))
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
 
@@ -74,6 +80,18 @@ class LoginUseCase(
         return Completable.fromCallable {
             preferences.edit(true) {
                 putString(AuthPresentationModel.PREF_SID, sid)
+            }
+        }
+    }
+
+    private fun saveLoginParams(params: LoginParams): Completable {
+        return Completable.fromCallable {
+            preferences.edit(true) {
+                putString(PREF_BASE_URL, params.address)
+                putString(PREF_SCHEME, "http")
+                putString(PREF_AUTH_INPUT_ADDRESS, params.address)
+                putString(PREF_AUTH_INPUT_ACCOUNT, params.account)
+                putString(PREF_AUTH_INPUT_PASSWORD, params.password)
             }
         }
     }

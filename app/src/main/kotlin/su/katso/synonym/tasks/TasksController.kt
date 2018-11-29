@@ -1,7 +1,6 @@
 package su.katso.synonym.tasks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
@@ -15,7 +14,6 @@ import su.katso.synonym.R
 import su.katso.synonym.common.arch.BaseController
 import su.katso.synonym.common.arch.PresentationModel.Command
 import su.katso.synonym.common.arch.ToastCommand
-import su.katso.synonym.common.utils.klog
 import su.katso.synonym.settings.SettingsController
 import su.katso.synonym.tasks.adapter.TasksAdapter
 
@@ -59,9 +57,6 @@ class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), Tasks
     override fun itemRecycleView() = adapter.clickSubject
 
     override fun render(viewState: TasksViewState) {
-
-        klog(Log.DEBUG, viewState)
-
         adapter.setItems(viewState.tasks)
         adapter.notifyDataSetChanged()
 

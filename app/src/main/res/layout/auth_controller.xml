@@ -2,10 +2,12 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
+    tools:context=".auth.AuthController"
     >
 
     <androidx.appcompat.widget.Toolbar
@@ -19,7 +21,7 @@
         />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etAddress"
+        android:id="@+id/tilAddress"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,12 +35,13 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:freezesText="true"
             android:textSize="20sp"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etAccount"
+        android:id="@+id/tilAccount"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,12 +54,13 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:freezesText="true"
             android:textSize="20sp"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etPassword"
+        android:id="@+id/tilPassword"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -69,6 +73,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:freezesText="true"
             android:inputType="textPassword"
             android:textSize="20sp"
             />
@@ -80,7 +85,7 @@
         android:layout_height="56dp"
         android:layout_gravity="center_horizontal"
         android:layout_margin="@dimen/size_xl"
-        android:text="Войти"
+        android:text="@string/auth_login"
         android:textSize="18sp"
         />
 </LinearLayout>
