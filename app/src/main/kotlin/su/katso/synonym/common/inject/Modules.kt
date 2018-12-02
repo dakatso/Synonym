@@ -14,8 +14,14 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import su.katso.synonym.BuildConfig
+import su.katso.synonym.auth.AuthPresentationModel.LoginParams
 import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ErrorInterceptor
+import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase
+import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase.Method
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase
+import su.katso.synonym.common.usecases.GetTaskListUseCase
+import su.katso.synonym.common.usecases.LoginUseCase
 
 val appModule: Module = module {
     single { get<Context>().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE) }
@@ -48,6 +54,13 @@ val appModule: Module = module {
             .build()
             .create(ApiService::class.java)
     }
+}
+
+val useCasesModule: Module = module {
+    factory { GetLoginParamsUseCase(get()) }
+    factory { (params: LoginParams) -> LoginUseCase(get(), get(), params) }
+    factory { GetTaskListUseCase(get(), get()) }
+    factory { (id: String, method: Method) -> ChangeTaskStatusUseCase(get(), get(), id, method) }
 }
 
 const val SESSION_SCOPE = "session_scope"

@@ -1,4 +1,4 @@
-package su.katso.synonym.auth
+package su.katso.synonym.common.usecases
 
 import android.content.SharedPreferences
 import io.reactivex.Single

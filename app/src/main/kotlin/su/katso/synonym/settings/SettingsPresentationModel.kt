@@ -4,6 +4,6 @@ import su.katso.synonym.common.arch.BasePresentationModel
 
 class SettingsPresentationModel : BasePresentationModel<SettingsViewController, SettingsViewState>(SettingsViewState()) {
 
-    override fun onBind(viewController: SettingsViewController) {
+    override fun onBind(controller: SettingsViewController) {
     }
 }

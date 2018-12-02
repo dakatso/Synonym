@@ -35,6 +35,7 @@ class TaskViewHolder(parent: ViewGroup) : WrapperViewHolder(parent) {
                 Status.WAITING -> R.drawable.ic_tasks_status_waiting
                 Status.DOWNLOADING -> R.drawable.ic_tasks_status_downloading
                 Status.ERROR -> R.drawable.ic_tasks_status_error
+                Status.FINISHED -> R.drawable.ic_tasks_status_finished
                 else -> R.drawable.ic_tasks_status_waiting
             }
         )

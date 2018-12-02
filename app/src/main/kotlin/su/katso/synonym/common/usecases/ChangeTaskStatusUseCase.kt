@@ -1,28 +1,27 @@
-package su.katso.synonym.tasks
+package su.katso.synonym.common.usecases
 
 import android.content.SharedPreferences
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import su.katso.synonym.auth.AuthPresentationModel
-import su.katso.synonym.common.arch.ObservableUseCase
+import su.katso.synonym.common.arch.SingleUseCase
 import su.katso.synonym.common.entities.TaskInfo
 import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ApiService.Api
 import su.katso.synonym.common.network.ApiService.BaseParams
 import su.katso.synonym.common.network.ApiService.TaskParams
-import java.util.concurrent.TimeUnit
 
-class TaskListUseCase(
+class ChangeTaskStatusUseCase(
     private val preferences: SharedPreferences,
-    private val api: ApiService
-) : ObservableUseCase<TaskInfo>() {
+    private val api: ApiService,
+    private val id: String,
+    private val method: Method
+) : SingleUseCase<TaskInfo>() {
 
-    override val observable: Observable<TaskInfo> = getSid()
-        .flatMapObservable { sid ->
-            Observable.interval(0, 10, TimeUnit.SECONDS)
-                .flatMapSingle { task(sid) }
+    override val single: Single<TaskInfo> = getSid()
+        .flatMap { sid ->
+            changeStatus(sid, id).flatMap { getTasks(sid) }
         }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -33,7 +32,17 @@ class TaskListUseCase(
         }
     }
 
-    private fun task(sid: String) = api.taskList(
+    private fun changeStatus(sid: String, id: String) = api.taskPause(
+        mapOf(
+            BaseParams.SID to sid,
+            BaseParams.API to Api.TASK,
+            BaseParams.METHOD to method.value,
+            BaseParams.VERSION to "1",
+            TaskParams.ID to id
+        )
+    )
+
+    private fun getTasks(sid: String) = api.taskList(
         mapOf(
             BaseParams.SID to sid,
             BaseParams.API to Api.TASK,
@@ -43,5 +52,10 @@ class TaskListUseCase(
             TaskParams.LIMIT to "100"
         )
     )
+
+    enum class Method(val value: String) {
+        PAUSE("pause"),
+        RESUME("resume")
+    }
 }
 

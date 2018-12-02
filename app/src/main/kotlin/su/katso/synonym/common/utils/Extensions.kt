@@ -20,9 +20,17 @@ fun Controller.hideKeyboard() {
     }
 }
 
+//TextInputLayout
 var TextInputLayout.text: String
     get() = editText?.text?.toString().orEmpty()
-    set(value) = editText?.setText(value) ?: Unit
+    set(value) {
+        isHintAnimationEnabled = false
+        editText?.setText(value)
+        isHintAnimationEnabled = true
+    }
+
+fun TextInputLayout.textChanges(): Observable<CharSequence> = editText?.textChanges()?.skipInitialValue()
+    ?: Observable.empty<CharSequence>()
 
 fun TextInputLayout.setError(isError: Boolean) {
     error = if (isError) " " else ""

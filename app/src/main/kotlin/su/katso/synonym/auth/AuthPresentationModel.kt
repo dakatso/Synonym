@@ -1,5 +1,6 @@
 package su.katso.synonym.auth
 
+import org.koin.core.parameter.parametersOf
 import org.koin.core.scope.Scope
 import org.koin.error.NoScopeFoundException
 import org.koin.standalone.get
@@ -8,29 +9,55 @@ import su.katso.synonym.common.arch.HideKeyboardCommand
 import su.katso.synonym.common.arch.PresentationModel.Command
 import su.katso.synonym.common.arch.ToastCommand
 import su.katso.synonym.common.inject.SESSION_SCOPE
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase
+import su.katso.synonym.common.usecases.LoginUseCase
 import su.katso.synonym.common.utils.getError
 
 class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthViewState>(AuthViewState()) {
     private var session: Scope? = null
     private var loginUseCase: LoginUseCase? = null
 
-    override fun onFirstBind(viewController: AuthViewController) {
-        GetLoginParamsUseCase(get()).interact(
-            onSuccess = { sendCommand(FillInputsCommand(it)) }
+    override fun onFirstBind(controller: AuthViewController) {
+        get<GetLoginParamsUseCase>().interact(
+            onSuccess = {
+                sendState {
+                    addressText = it.address
+                    accountText = it.account
+                    passwordText = it.password
+                }
+            }
         )
     }
 
-    override fun onBind(viewController: AuthViewController) {
-        bindTo(viewController.buttonLogin()) {
+    override fun onBind(controller: AuthViewController) {
+        bindTo(controller.editTextAddressTextChanges()) {
+            modifyState { addressText = it.toString() }
+        }
+
+        bindTo(controller.editTextAccountTextChanges()) {
+            modifyState { accountText = it.toString() }
+        }
+
+        bindTo(controller.editTextPasswordTextChanges()) {
+            modifyState { passwordText = it.toString() }
+        }
+
+        bindTo(controller.buttonLoginClicks()) {
 
             loginUseCase?.dispose()
 
-            if (it.isValid()) {
+            if (viewState.isInputValid()) {
                 reCreateScope()
 
                 sendCommand(HideKeyboardCommand())
 
-                loginUseCase = LoginUseCase(get(), get(), it)
+                val params = LoginParams(
+                    viewState.addressText,
+                    viewState.accountText,
+                    viewState.passwordText
+                )
+
+                loginUseCase = get { parametersOf(params) }
                 loginUseCase?.interact(
                     onComplete = {
                         sendCommand(OpenTasksCommand())
@@ -43,10 +70,10 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
                 )
             }
 
-            modifyState {
-                isAddressError = it.address.isEmpty()
-                isAccountError = it.account.isEmpty()
-                isPasswordError = it.password.isEmpty()
+            sendState {
+                isAddressError = viewState.addressText.isEmpty()
+                isAccountError = viewState.accountText.isEmpty()
+                isPasswordError = viewState.passwordText.isEmpty()
             }
         }
     }
@@ -71,9 +98,5 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
         val address: String,
         val account: String,
         val password: String
-    ) {
-        fun isValid() = address.isNotEmpty()
-                && account.isNotEmpty()
-                && password.isNotEmpty()
-    }
+    )
 }

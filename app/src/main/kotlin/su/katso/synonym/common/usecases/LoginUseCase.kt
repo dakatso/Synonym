@@ -1,4 +1,4 @@
-package su.katso.synonym.auth
+package su.katso.synonym.common.usecases
 
 import android.content.SharedPreferences
 import android.util.Base64
@@ -7,10 +7,11 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import su.katso.synonym.auth.AuthPresentationModel
 import su.katso.synonym.auth.AuthPresentationModel.LoginParams
-import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ACCOUNT
-import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ADDRESS
-import su.katso.synonym.auth.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_PASSWORD
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ACCOUNT
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ADDRESS
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_PASSWORD
 import su.katso.synonym.common.arch.CompletableUseCase
 import su.katso.synonym.common.entities.AuthInfo
 import su.katso.synonym.common.entities.EncryptionInfo

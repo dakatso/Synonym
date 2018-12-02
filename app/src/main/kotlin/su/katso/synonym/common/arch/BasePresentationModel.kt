@@ -10,7 +10,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Function
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.withLatestFrom
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import org.koin.standalone.KoinComponent
 import su.katso.synonym.common.arch.PresentationModel.Command
@@ -20,8 +19,8 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
 
     private val unBindDisposable = CompositeDisposable()
     private val onClearDisposable = CompositeDisposable()
-
-    private val viewState: BehaviorSubject<VS> = BehaviorSubject.createDefault(defaultState)
+    
+    private val state = Model(defaultState)
 
     private val commands = PublishSubject.create<Command>()
     private val valve = PublishSubject.create<Boolean>()
@@ -42,24 +41,22 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
         })
     }
 
-    private fun onBindController(viewController: C) {
-        viewState
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { viewController.render(it) }
+    private fun onBindController(controller: C) {
+        state.subscribe { controller.render(it) }
             .addTo(unBindDisposable)
 
         commandsValve
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { viewController.react(it) }
+            .subscribe { controller.react(it) }
             .addTo(unBindDisposable)
 
         valve.onNext(true)
 
         if (isFirstBind) {
-            onFirstBind(viewController)
+            onFirstBind(controller)
             isFirstBind = false
         }
-        onBind(viewController)
+        onBind(controller)
     }
 
     private fun onUnbind() {
@@ -70,28 +67,23 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
     private fun onCleared() {
         onClearDisposable.clear()
         valve.onComplete()
-        viewState.onComplete()
+        state.unSubscribe()
         commands.onComplete()
         onDestroy()
     }
 
-    protected abstract fun onBind(viewController: C)
-    protected open fun onFirstBind(viewController: C) {}
+    protected abstract fun onBind(controller: C)
+    protected open fun onFirstBind(controller: C) {}
     protected open fun onDestroy() {}
 
     protected fun <T> bindTo(observable: Observable<T>, onNext: (T) -> Unit) {
         observable.subscribe(onNext).addTo(unBindDisposable)
     }
 
-    protected fun sendCommand(command: Command) {
-        commands.onNext(command)
-    }
-
-    protected fun modifyState(apply: VS.() -> Unit) {
-        viewState.value?.let {
-            viewState.onNext(it.apply { apply() })
-        } ?: throw NullPointerException()
-    }
+    protected fun sendCommand(command: Command) = commands.onNext(command)
+    protected fun modifyState(modifier: VS.() -> Unit) = state.modifyState(modifier)
+    protected fun sendState(modifier: VS.() -> Unit = {}) = state.sendState(modifier)
+    protected val viewState: VS get() = state.value
 
     protected fun <T> ObservableUseCase<T>.interact(
         onStart: (() -> Unit)? = null,
