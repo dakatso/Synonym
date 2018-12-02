@@ -8,6 +8,8 @@ import com.bluelinelabs.conductor.Controller
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
+import com.jakewharton.rxbinding3.widget.textChanges
+import io.reactivex.Observable
 import retrofit2.HttpException
 import su.katso.synonym.BuildConfig
 
@@ -17,6 +19,10 @@ fun Controller.hideKeyboard() {
         imm?.hideSoftInputFromWindow(it.windowToken, 0)
     }
 }
+
+var TextInputLayout.text: String
+    get() = editText?.text?.toString().orEmpty()
+    set(value) = editText?.setText(value) ?: Unit
 
 fun TextInputLayout.setError(isError: Boolean) {
     error = if (isError) " " else ""

@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.Toast
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.material.textfield.TextInputLayout
-import com.jakewharton.rxbinding2.view.RxView
+import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
 import su.katso.synonym.R
 import su.katso.synonym.auth.AuthPresentationModel.FillInputsCommand
@@ -40,7 +40,7 @@ class AuthController(args: Bundle = Bundle.EMPTY) : BaseController(args), AuthVi
     override fun buttonLogin(): Observable<LoginParams> {
         fun TextInputLayout.getText() = editText?.text?.toString().orEmpty()
 
-        return RxView.clicks(btnLogin)
+        return btnLogin.clicks()
             .map { LoginParams(tilAddress.getText(), tilAccount.getText(), tilPassword.getText()) }
     }
 

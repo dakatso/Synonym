@@ -52,7 +52,9 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxjava:2.2.4")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.0")
     implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
-    implementation("com.jakewharton.rxbinding2:rxbinding:2.2.0")
+    implementation("com.jakewharton.rxbinding3:rxbinding-core:3.0.0-alpha1")
+    implementation("com.jakewharton.rxbinding3:rxbinding-appcompat:3.0.0-alpha1")
+
 
     implementation("com.squareup.retrofit2:retrofit:2.5.0")
     implementation("com.squareup.retrofit2:converter-gson:2.5.0")
