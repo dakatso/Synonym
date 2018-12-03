@@ -10,6 +10,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.RouterTransaction
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding3.view.clicks
 import su.katso.synonym.R
 import su.katso.synonym.common.arch.BaseController
 import su.katso.synonym.common.arch.PresentationModel.Command
@@ -25,6 +27,7 @@ class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), Tasks
     private lateinit var adapter: TasksAdapter
     private lateinit var progressBar: ProgressBar
     private lateinit var rvTasks: RecyclerView
+    private lateinit var fabCreate: FloatingActionButton
 
     override fun View.initView() {
 
@@ -39,6 +42,7 @@ class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), Tasks
         rvTasks.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         rvTasks.adapter = adapter
 
+        fabCreate = findViewById(R.id.fabCreate)
         progressBar = findViewById(R.id.progressBar)
     }
 
@@ -54,7 +58,8 @@ class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), Tasks
         return super.onOptionsItemSelected(item)
     }
 
-    override fun itemRecycleView() = adapter.clickSubject
+    override fun recycleViewItemClicks() = adapter.clickSubject
+    override fun floatingButtonClicks() = fabCreate.clicks()
 
     override fun render(viewState: TasksViewState) {
         adapter.setItems(viewState.tasks)

@@ -15,7 +15,7 @@ class ErrorInterceptor : Interceptor {
             val jsonRoot = JsonParser().parse(response.body()?.string()).asJsonObject
             val isSuccess = jsonRoot.getAsJsonPrimitive("success").asBoolean
 
-            val jsonResponse = (if (isSuccess) jsonRoot.get("data")
+            val jsonResponse = (if (isSuccess) jsonRoot.get("data") ?: ""
             else jsonRoot.get("error")).toString()
 
             return response.newBuilder()

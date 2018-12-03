@@ -21,7 +21,7 @@ class GetTaskListUseCase(
 
     override val observable: Observable<TaskInfo> = getSid()
         .flatMapObservable { sid ->
-            Observable.interval(0, 10, TimeUnit.SECONDS)
+            Observable.interval(0, 5, TimeUnit.SECONDS)
                 .flatMapSingle { task(sid) }
         }
         .subscribeOn(Schedulers.io())

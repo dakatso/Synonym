@@ -19,6 +19,7 @@ import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ErrorInterceptor
 import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase
 import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase.Method
+import su.katso.synonym.common.usecases.CreateTaskUseCase
 import su.katso.synonym.common.usecases.GetLoginParamsUseCase
 import su.katso.synonym.common.usecases.GetTaskListUseCase
 import su.katso.synonym.common.usecases.LoginUseCase
@@ -61,6 +62,7 @@ val useCasesModule: Module = module {
     factory { (params: LoginParams) -> LoginUseCase(get(), get(), params) }
     factory { GetTaskListUseCase(get(), get()) }
     factory { (id: String, method: Method) -> ChangeTaskStatusUseCase(get(), get(), id, method) }
+    factory { (uri: String) -> CreateTaskUseCase(get(), get(), uri) }
 }
 
 const val SESSION_SCOPE = "session_scope"

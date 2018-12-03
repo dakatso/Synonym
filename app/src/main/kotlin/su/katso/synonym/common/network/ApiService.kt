@@ -1,5 +1,6 @@
 package su.katso.synonym.common.network
 
+import io.reactivex.Completable
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
@@ -24,7 +25,11 @@ interface ApiService {
     fun taskList(@QueryMap params: Map<String, String>): Single<TaskInfo>
 
     @GET("DownloadStation/task.cgi")
-    fun taskPause(@QueryMap params: Map<String, String>): Single<List<TaskAction>>
+    fun taskChangeStatus(@QueryMap params: Map<String, String>): Single<List<TaskAction>>
+
+    @GET("DownloadStation/task.cgi")
+    fun taskCreate(@QueryMap params: Map<String, String>): Completable
+
 
     object BaseParams {
         const val API: String = "api"
@@ -47,6 +52,7 @@ interface ApiService {
         const val ADDITIONAL: String = "additional"
         const val LIMIT: String = "limit"
         const val OFFSET: String = "offset"
+        const val URI: String = "uri"
     }
 
     object Api {

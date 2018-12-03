@@ -12,17 +12,14 @@ import su.katso.synonym.common.network.ApiService.Api
 import su.katso.synonym.common.network.ApiService.BaseParams
 import su.katso.synonym.common.network.ApiService.TaskParams
 
-class ChangeTaskStatusUseCase(
+class CreateTaskUseCase(
     private val preferences: SharedPreferences,
     private val api: ApiService,
-    private val id: String,
-    private val method: Method
+    private val uri: String
 ) : SingleUseCase<TaskInfo>() {
 
     override val single: Single<TaskInfo> = getSid()
-        .flatMap { sid ->
-            changeStatus(sid, id).flatMap { getTasks(sid) }
-        }
+        .flatMap { create(it, uri).andThen(getTasks(it)) }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
 
@@ -32,13 +29,13 @@ class ChangeTaskStatusUseCase(
         }
     }
 
-    private fun changeStatus(sid: String, id: String) = api.taskChangeStatus(
+    private fun create(sid: String, uri: String) = api.taskCreate(
         mapOf(
             BaseParams.SID to sid,
             BaseParams.API to Api.TASK,
-            BaseParams.METHOD to method.value,
+            BaseParams.METHOD to "create",
             BaseParams.VERSION to "1",
-            TaskParams.ID to id
+            TaskParams.URI to uri
         )
     )
 

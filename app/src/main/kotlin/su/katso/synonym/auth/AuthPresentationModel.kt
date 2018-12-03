@@ -18,15 +18,15 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
     private var loginUseCase: LoginUseCase? = null
 
     override fun onFirstBind(controller: AuthViewController) {
-        get<GetLoginParamsUseCase>().interact(
-            onSuccess = {
+        get<GetLoginParamsUseCase>().interact {
+            onSuccess {
                 sendState {
                     addressText = it.address
                     accountText = it.account
                     passwordText = it.password
                 }
             }
-        )
+        }
     }
 
     override fun onBind(controller: AuthViewController) {
@@ -58,16 +58,16 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
                 )
 
                 loginUseCase = get { parametersOf(params) }
-                loginUseCase?.interact(
-                    onComplete = {
+                loginUseCase?.interact {
+                    onComplete {
                         sendCommand(OpenTasksCommand())
-                    },
-                    onError = {
+                    }
+                    onError {
                         val error = it.getError()
                         error?.let { sendCommand(ToastCommand(it.toString())) }
                             ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
                     }
-                )
+                }
             }
 
             sendState {

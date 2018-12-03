@@ -6,9 +6,9 @@ import androidx.lifecycle.OnLifecycleEvent
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Function
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.PublishSubject
 import org.koin.standalone.KoinComponent
@@ -19,7 +19,7 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
 
     private val unBindDisposable = CompositeDisposable()
     private val onClearDisposable = CompositeDisposable()
-    
+
     private val state = Model(defaultState)
 
     private val commands = PublishSubject.create<Command>()
@@ -85,32 +85,16 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
     protected fun sendState(modifier: VS.() -> Unit = {}) = state.sendState(modifier)
     protected val viewState: VS get() = state.value
 
-    protected fun <T> ObservableUseCase<T>.interact(
-        onStart: (() -> Unit)? = null,
-        onNext: (T) -> Unit,
-        onComplete: (() -> Unit)? = null,
-        onError: ((Throwable) -> Unit)? = null
-    ) {
-        subscribe(onStart, onNext, onComplete, onError)
-            .addTo(onClearDisposable)
+    protected fun <T> ObservableUseCase<T>.interact(apply: ObservableObserver<T>.() -> Unit) {
+        onClearDisposable += subscribe(ObservableObserver<T>().apply(apply).build())
     }
 
-    protected fun CompletableUseCase.interact(
-        onStart: (() -> Unit)? = null,
-        onComplete: (() -> Unit)? = null,
-        onError: ((Throwable) -> Unit)? = null
-    ) {
-        subscribe(onStart, onComplete, onError)
-            .addTo(onClearDisposable)
+    protected fun <T> SingleUseCase<T>.interact(apply: SingleObserver<T>.() -> Unit) {
+        onClearDisposable += subscribe(SingleObserver<T>().apply(apply).build())
     }
 
-    protected fun <T> SingleUseCase<T>.interact(
-        onStart: (() -> Unit)? = null,
-        onSuccess: (T) -> Unit,
-        onError: ((Throwable) -> Unit)? = null
-    ): Disposable {
-        return subscribe(onStart, onSuccess, onError)
-            .addTo(onClearDisposable)
+    protected fun CompletableUseCase.interact(apply: CompletableObserver.() -> Unit) {
+        onClearDisposable += subscribe(CompletableObserver().apply(apply).build())
     }
 
     private fun <C : Command> Observable<C>.valve(valve: Observable<Boolean>, bufferSize: Int? = null): Observable<C> {
