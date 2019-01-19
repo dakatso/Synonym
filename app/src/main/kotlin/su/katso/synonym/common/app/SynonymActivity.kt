@@ -1,13 +1,16 @@
 package su.katso.synonym.common.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import su.katso.synonym.R
 import su.katso.synonym.auth.AuthController
+import su.katso.synonym.common.utils.klog
 
 class SynonymActivity : AppCompatActivity() {
 
@@ -17,11 +20,19 @@ class SynonymActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.app_activity)
 
+        klog(Log.DEBUG, intent?.action)
+        klog(Log.DEBUG, intent?.data)
+
         val container = findViewById<ViewGroup>(R.id.controller_container)
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
         if (!router.hasRootController()) {
-            router.setRoot(RouterTransaction.with(AuthController()))
+
+            val bundle = intent?.data?.let { bundleOf(EXTRA_URI to it) } ?: Bundle.EMPTY
+
+            router.setRoot(
+                RouterTransaction.with(AuthController(bundle))
+            )
         }
     }
 
@@ -29,5 +40,9 @@ class SynonymActivity : AppCompatActivity() {
         if (!router.handleBack()) {
             super.onBackPressed()
         }
+    }
+
+    companion object {
+        const val EXTRA_URI = "extra_uri"
     }
 }
