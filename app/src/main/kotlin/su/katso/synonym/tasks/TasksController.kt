@@ -1,80 +1,104 @@
 package su.katso.synonym.tasks
 
-import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import android.widget.ProgressBar
-import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.bluelinelabs.conductor.RouterTransaction
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.jakewharton.rxbinding3.view.clicks
-import su.katso.synonym.R
+import org.koin.core.parameter.parametersOf
+import org.koin.standalone.get
 import su.katso.synonym.common.arch.BaseController
-import su.katso.synonym.common.arch.PresentationModel.Command
 import su.katso.synonym.common.arch.ToastCommand
-import su.katso.synonym.settings.SettingsController
-import su.katso.synonym.tasks.adapter.TasksAdapter
+import su.katso.synonym.common.entities.Task.Status
+import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase
+import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase.Method
+import su.katso.synonym.common.usecases.CreateTaskUseCase
+import su.katso.synonym.common.usecases.GetTaskListUseCase
+import su.katso.synonym.common.utils.getError
+import su.katso.synonym.tasks.adapter.TaskViewObject
 
-class TasksController(args: Bundle = Bundle.EMPTY) : BaseController(args), TasksViewController {
-    override val content: Int = R.layout.tasks_controller
-    override val presentationModel = TasksPresentationModel()
-        .also { it.bindToLifecycle(this) }
+class TasksController : BaseController<TasksView, TasksModel>(TasksModel()) {
 
-    private lateinit var adapter: TasksAdapter
-    private lateinit var progressBar: ProgressBar
-    private lateinit var rvTasks: RecyclerView
-    private lateinit var fabCreate: FloatingActionButton
+    override fun onFirstBind(view: TasksView) {
+        getTaskList()
+    }
 
-    override fun View.initView() {
-
-        with(findViewById<Toolbar>(R.id.toolbar)) {
-            inflateMenu(R.menu.menu_tasks)
-            setOnMenuItemClickListener(::onOptionsItemSelected)
+    override fun onBind(view: TasksView) {
+        bindTo(view.recycleViewItemClicks()) {
+            when (val item = it.item) {
+                is TaskViewObject -> changeTaskStatus(
+                    item.id, if (item.status == Status.PAUSED) Method.RESUME else Method.PAUSE
+                )
+            }
         }
 
-        rvTasks = findViewById(R.id.rvTasks)
-
-        adapter = TasksAdapter()
-        rvTasks.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        rvTasks.adapter = adapter
-
-        fabCreate = findViewById(R.id.fabCreate)
-        progressBar = findViewById(R.id.progressBar)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_settings) {
-
-            router.pushController(
-                RouterTransaction.with(SettingsController())
-            )
-
-            return true
+        bindTo(view.floatingButtonClicks()) {
+            createTask("magnet:?xt=urn:btih:9568f604d980b806612b463adce2e1b94b5fb503")
         }
-        return super.onOptionsItemSelected(item)
     }
 
-    override fun recycleViewItemClicks() = adapter.clickSubject
-    override fun floatingButtonClicks() = fabCreate.clicks()
+    private fun createTask(uri: String) {
+        get<CreateTaskUseCase> { parametersOf(uri) }.interact {
 
-    override fun render(viewState: TasksViewState) {
-        adapter.setItems(viewState.tasks)
-        adapter.notifyDataSetChanged()
+            onStart {
+                modifyState { isLoading = true }
+            }
 
-        progressBar.isVisible = viewState.isLoading
-        rvTasks.isVisible = !viewState.isLoading
+            onSuccess {
+                modifyState {
+                    isLoading = false
+                    tasks = it.tasks.map(::TaskViewObject)
+                }
+            }
+
+            onError {
+                val error = it.getError()
+                error?.let { sendCommand(ToastCommand(it.toString())) }
+                    ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
+
+                modifyState { isLoading = false }
+            }
+        }
     }
 
-    override fun react(command: Command) {
-        when (command) {
-            is ToastCommand -> Toast.makeText(applicationContext, command.text, Toast.LENGTH_LONG).show()
+    private fun changeTaskStatus(id: String, method: Method) {
+        get<ChangeTaskStatusUseCase> { parametersOf(id, method) }.interact {
+            onStart {
+                modifyState { isLoading = true }
+            }
+
+            onSuccess {
+                modifyState {
+                    isLoading = false
+                    tasks = it.tasks.map(::TaskViewObject)
+                }
+            }
+
+            onError {
+                val error = it.getError()
+                error?.let { sendCommand(ToastCommand(it.toString())) }
+                    ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
+
+                modifyState { isLoading = false }
+            }
+        }
+    }
+
+    private fun getTaskList() {
+        get<GetTaskListUseCase>().interact {
+            onStart {
+                modifyState { isLoading = true }
+            }
+
+            onNext {
+                modifyState {
+                    isLoading = false
+                    tasks = it.tasks.map(::TaskViewObject)
+                }
+            }
+
+            onError {
+                val error = it.getError()
+                error?.let { sendCommand(ToastCommand(it.toString())) }
+                    ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
+
+                modifyState { isLoading = false }
+            }
         }
     }
 }
-
-
-

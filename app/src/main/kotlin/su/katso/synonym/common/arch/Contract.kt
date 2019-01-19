@@ -1,16 +1,11 @@
 package su.katso.synonym.common.arch
 
 import androidx.lifecycle.LifecycleOwner
-import su.katso.synonym.common.arch.PresentationModel.Command
-import su.katso.synonym.common.arch.PresentationModel.ViewState
 
-interface ViewController<VS : ViewState> : LifecycleOwner {
-    fun render(viewState: VS)
+interface MvcView<M : MvcModel> : LifecycleOwner {
+    fun render(model: M)
     fun react(command: Command)
 }
-
-interface PresentationModel {
-    interface Command
-    interface ViewState
-}
+interface MvcController
+interface MvcModel
 

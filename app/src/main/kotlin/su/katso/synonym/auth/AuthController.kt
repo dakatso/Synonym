@@ -1,82 +1,102 @@
 package su.katso.synonym.auth
 
-import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.Toast
-import com.bluelinelabs.conductor.RouterTransaction
-import com.google.android.material.textfield.TextInputLayout
-import com.jakewharton.rxbinding3.view.clicks
-import su.katso.synonym.R
-import su.katso.synonym.auth.AuthPresentationModel.FillInputsCommand
-import su.katso.synonym.auth.AuthPresentationModel.OpenTasksCommand
+import org.koin.core.parameter.parametersOf
+import org.koin.core.scope.Scope
+import org.koin.error.NoScopeFoundException
+import org.koin.standalone.get
 import su.katso.synonym.common.arch.BaseController
+import su.katso.synonym.common.arch.Command
 import su.katso.synonym.common.arch.HideKeyboardCommand
-import su.katso.synonym.common.arch.PresentationModel.Command
 import su.katso.synonym.common.arch.ToastCommand
-import su.katso.synonym.common.utils.hideKeyboard
-import su.katso.synonym.common.utils.klog
-import su.katso.synonym.common.utils.setError
-import su.katso.synonym.common.utils.text
-import su.katso.synonym.common.utils.textChanges
-import su.katso.synonym.tasks.TasksController
+import su.katso.synonym.common.inject.SESSION_SCOPE
+import su.katso.synonym.common.usecases.GetLoginParamsUseCase
+import su.katso.synonym.common.usecases.LoginUseCase
+import su.katso.synonym.common.utils.getError
 
-class AuthController(args: Bundle = Bundle.EMPTY) : BaseController(args), AuthViewController {
-    override val content = R.layout.auth_controller
-    override val presentationModel = AuthPresentationModel()
-        .also { it.bindToLifecycle(this) }
+class AuthController : BaseController<AuthView, AuthModel>(AuthModel()) {
+    private var session: Scope? = null
+    private var loginUseCase: LoginUseCase? = null
 
-    private lateinit var btnLogin: Button
-    private lateinit var tilAddress: TextInputLayout
-    private lateinit var tilAccount: TextInputLayout
-    private lateinit var tilPassword: TextInputLayout
-
-    override fun View.initView() {
-        btnLogin = findViewById(R.id.btnLogin)
-        tilAddress = findViewById(R.id.tilAddress)
-        tilAccount = findViewById(R.id.tilAccount)
-        tilPassword = findViewById(R.id.tilPassword)
-    }
-
-    override fun buttonLoginClicks() = btnLogin.clicks()
-    override fun editTextAddressTextChanges() = tilAddress.textChanges()
-    override fun editTextAccountTextChanges() = tilAccount.textChanges()
-    override fun editTextPasswordTextChanges() = tilPassword.textChanges()
-
-    override fun render(viewState: AuthViewState) {
-        klog(Log.DEBUG, viewState)
-
-        tilAddress.setError(viewState.isAddressError)
-        tilAccount.setError(viewState.isAccountError)
-        tilPassword.setError(viewState.isPasswordError)
-
-        tilAddress.text = viewState.addressText
-        tilAccount.text = viewState.accountText
-        tilPassword.text = viewState.passwordText
-    }
-
-    override fun react(command: Command) {
-        when (command) {
-            is ToastCommand -> {
-                applicationContext?.let {
-                    Toast.makeText(it, command.text, Toast.LENGTH_SHORT).show()
+    override fun onFirstBind(view: AuthView) {
+        get<GetLoginParamsUseCase>().interact {
+            onSuccess {
+                modifyState {
+                    addressText = it.address
+                    accountText = it.account
+                    passwordText = it.password
                 }
-            }
-            is OpenTasksCommand -> {
-                router.setRoot(RouterTransaction.with(TasksController()))
-            }
-
-            is HideKeyboardCommand -> hideKeyboard()
-
-            is FillInputsCommand -> {
-                tilAddress.text = command.loginParams.address
-                tilAccount.text = command.loginParams.account
-                tilPassword.text = command.loginParams.password
             }
         }
     }
+
+    override fun onBind(view: AuthView) {
+        bindTo(view.editTextAddressTextChanges()) {
+            modifyState(false) { addressText = it.toString() }
+        }
+
+        bindTo(view.editTextAccountTextChanges()) {
+            modifyState(false) { accountText = it.toString() }
+        }
+
+        bindTo(view.editTextPasswordTextChanges()) {
+            modifyState(false) { passwordText = it.toString() }
+        }
+
+        bindTo(view.buttonLoginClicks()) {
+
+            loginUseCase?.dispose()
+
+            if (viewState.isInputValid()) {
+                reCreateScope()
+
+                sendCommand(HideKeyboardCommand())
+
+                val params = LoginParams(
+                    viewState.addressText,
+                    viewState.accountText,
+                    viewState.passwordText
+                )
+
+                loginUseCase = get { parametersOf(params) }
+                loginUseCase?.interact {
+                    onComplete {
+                        sendCommand(OpenTasksCommand())
+                    }
+                    onError {
+                        val error = it.getError()
+                        error?.let { sendCommand(ToastCommand(it.toString())) }
+                            ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
+                    }
+                }
+            }
+
+            modifyState {
+                isAddressError = viewState.addressText.isEmpty()
+                isAccountError = viewState.accountText.isEmpty()
+                isPasswordError = viewState.passwordText.isEmpty()
+            }
+        }
+    }
+
+    private fun reCreateScope() {
+        try {
+            getKoin().getScope(SESSION_SCOPE).close()
+        } catch (e: NoScopeFoundException) {
+        }
+
+        session = getKoin().createScope(SESSION_SCOPE)
+    }
+
+    companion object {
+        const val PREF_SID = "pref_sid"
+    }
+
+    class OpenTasksCommand : Command
+    class FillInputsCommand(val loginParams: LoginParams) : Command
+
+    class LoginParams(
+        val address: String,
+        val account: String,
+        val password: String
+    )
 }
-
-
-

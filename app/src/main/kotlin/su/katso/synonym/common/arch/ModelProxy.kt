@@ -3,18 +3,17 @@ package su.katso.synonym.common.arch
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import su.katso.synonym.common.arch.PresentationModel.ViewState
 
-class Model<VS : ViewState>(default: VS) {
-    var value: VS = default
-    private val publishSubject = PublishSubject.create<VS>()
+class ModelProxy<M : MvcModel>(default: M) {
+    var value: M = default
+    private val publishSubject = PublishSubject.create<M>()
 
-    fun modifyState(modifier: VS.() -> Unit, isNeedSend: Boolean) {
+    fun modifyState(modifier: M.() -> Unit, isNeedSend: Boolean) {
         value = value.apply { modifier() }
         if (isNeedSend) publishSubject.onNext(value)
     }
 
-    fun subscribe(renderer: (VS) -> Unit): Disposable {
+    fun subscribe(renderer: (M) -> Unit): Disposable {
         val disposable = publishSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(renderer)

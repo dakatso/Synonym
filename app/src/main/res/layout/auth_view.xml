@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
-    tools:context=".auth.AuthController"
+    tools:context=".auth.AuthView"
     >
 
     <androidx.appcompat.widget.Toolbar

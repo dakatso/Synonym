@@ -1,8 +1,8 @@
 package su.katso.synonym.auth
 
-import su.katso.synonym.common.arch.PresentationModel.ViewState
+import su.katso.synonym.common.arch.MvcModel
 
-data class AuthViewState(
+data class AuthModel(
     var isLoading: Boolean = false,
     var isAddressError: Boolean = false,
     var addressText: String = "",
@@ -10,7 +10,7 @@ data class AuthViewState(
     var accountText: String = "",
     var isPasswordError: Boolean = false,
     var passwordText: String = ""
-) : ViewState {
+) : MvcModel {
     fun isInputValid() = addressText.isNotEmpty()
             && accountText.isNotEmpty()
             && passwordText.isNotEmpty()

@@ -14,7 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import su.katso.synonym.BuildConfig
-import su.katso.synonym.auth.AuthPresentationModel.LoginParams
+import su.katso.synonym.auth.AuthController.LoginParams
 import su.katso.synonym.common.network.ApiService
 import su.katso.synonym.common.network.ErrorInterceptor
 import su.katso.synonym.common.usecases.ChangeTaskStatusUseCase

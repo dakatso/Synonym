@@ -7,8 +7,8 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import su.katso.synonym.auth.AuthPresentationModel
-import su.katso.synonym.auth.AuthPresentationModel.LoginParams
+import su.katso.synonym.auth.AuthController
+import su.katso.synonym.auth.AuthController.LoginParams
 import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ACCOUNT
 import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_ADDRESS
 import su.katso.synonym.common.usecases.GetLoginParamsUseCase.Companion.PREF_AUTH_INPUT_PASSWORD
@@ -80,7 +80,7 @@ class LoginUseCase(
     private fun saveSid(sid: String): Completable {
         return Completable.fromCallable {
             preferences.edit(true) {
-                putString(AuthPresentationModel.PREF_SID, sid)
+                putString(AuthController.PREF_SID, sid)
             }
         }
     }

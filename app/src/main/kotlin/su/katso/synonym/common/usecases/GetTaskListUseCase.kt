@@ -5,7 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import su.katso.synonym.auth.AuthPresentationModel
+import su.katso.synonym.auth.AuthController
 import su.katso.synonym.common.arch.ObservableUseCase
 import su.katso.synonym.common.entities.TaskInfo
 import su.katso.synonym.common.network.ApiService
@@ -29,7 +29,7 @@ class GetTaskListUseCase(
 
     private fun getSid(): Single<String> {
         return Single.fromCallable {
-            preferences.getString(AuthPresentationModel.PREF_SID, "")
+            preferences.getString(AuthController.PREF_SID, "")
         }
     }
 

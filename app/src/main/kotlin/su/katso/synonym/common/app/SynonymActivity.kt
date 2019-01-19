@@ -9,7 +9,7 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import su.katso.synonym.R
-import su.katso.synonym.auth.AuthController
+import su.katso.synonym.auth.AuthView
 import su.katso.synonym.common.utils.klog
 
 class SynonymActivity : AppCompatActivity() {
@@ -31,7 +31,7 @@ class SynonymActivity : AppCompatActivity() {
             val bundle = intent?.data?.let { bundleOf(EXTRA_URI to it) } ?: Bundle.EMPTY
 
             router.setRoot(
-                RouterTransaction.with(AuthController(bundle))
+                RouterTransaction.with(AuthView(bundle))
             )
         }
     }

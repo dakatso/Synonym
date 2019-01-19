@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import su.katso.synonym.auth.AuthPresentationModel.LoginParams
+import su.katso.synonym.auth.AuthController.LoginParams
 import su.katso.synonym.common.arch.SingleUseCase
 
 class GetLoginParamsUseCase(
