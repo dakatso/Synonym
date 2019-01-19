@@ -81,8 +81,8 @@ abstract class BasePresentationModel<C : ViewController<VS>, VS : ViewState>(def
     }
 
     protected fun sendCommand(command: Command) = commands.onNext(command)
-    protected fun modifyState(modifier: VS.() -> Unit) = state.modifyState(modifier)
-    protected fun sendState(modifier: VS.() -> Unit = {}) = state.sendState(modifier)
+    protected fun modifyState(modifier: VS.() -> Unit) = state.modifyState(modifier, true)
+    protected fun modifyState(isNeedSend: Boolean, modifier: VS.() -> Unit) = state.modifyState(modifier, isNeedSend)
     protected val viewState: VS get() = state.value
 
     protected fun <T> ObservableUseCase<T>.interact(apply: ObservableObserver<T>.() -> Unit) {

@@ -9,20 +9,16 @@ class Model<VS : ViewState>(default: VS) {
     var value: VS = default
     private val publishSubject = PublishSubject.create<VS>()
 
-    fun sendState(modifier: VS.() -> Unit = {}) {
+    fun modifyState(modifier: VS.() -> Unit, isNeedSend: Boolean) {
         value = value.apply { modifier() }
-        publishSubject.onNext(value)
-    }
-
-    fun modifyState(modifier: VS.() -> Unit) {
-        value = value.apply { modifier() }
+        if (isNeedSend) publishSubject.onNext(value)
     }
 
     fun subscribe(renderer: (VS) -> Unit): Disposable {
         val disposable = publishSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(renderer)
-        sendState()
+        publishSubject.onNext(value)
         return disposable
     }
 

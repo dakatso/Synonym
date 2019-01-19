@@ -20,7 +20,7 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
     override fun onFirstBind(controller: AuthViewController) {
         get<GetLoginParamsUseCase>().interact {
             onSuccess {
-                sendState {
+                modifyState {
                     addressText = it.address
                     accountText = it.account
                     passwordText = it.password
@@ -31,15 +31,15 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
 
     override fun onBind(controller: AuthViewController) {
         bindTo(controller.editTextAddressTextChanges()) {
-            modifyState { addressText = it.toString() }
+            modifyState(false) { addressText = it.toString() }
         }
 
         bindTo(controller.editTextAccountTextChanges()) {
-            modifyState { accountText = it.toString() }
+            modifyState(false) { accountText = it.toString() }
         }
 
         bindTo(controller.editTextPasswordTextChanges()) {
-            modifyState { passwordText = it.toString() }
+            modifyState(false) { passwordText = it.toString() }
         }
 
         bindTo(controller.buttonLoginClicks()) {
@@ -70,7 +70,7 @@ class AuthPresentationModel : BasePresentationModel<AuthViewController, AuthView
                 }
             }
 
-            sendState {
+            modifyState {
                 isAddressError = viewState.addressText.isEmpty()
                 isAccountError = viewState.accountText.isEmpty()
                 isPasswordError = viewState.passwordText.isEmpty()

@@ -36,11 +36,11 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
         get<CreateTaskUseCase> { parametersOf(uri) }.interact {
 
             onStart {
-                sendState { isLoading = true }
+                modifyState { isLoading = true }
             }
 
             onSuccess {
-                sendState {
+                modifyState {
                     isLoading = false
                     tasks = it.tasks.map(::TaskViewObject)
                 }
@@ -51,7 +51,7 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
                 error?.let { sendCommand(ToastCommand(it.toString())) }
                     ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
 
-                sendState { isLoading = false }
+                modifyState { isLoading = false }
             }
         }
     }
@@ -59,11 +59,11 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
     private fun changeTaskStatus(id: String, method: Method) {
         get<ChangeTaskStatusUseCase> { parametersOf(id, method) }.interact {
             onStart {
-                sendState { isLoading = true }
+                modifyState { isLoading = true }
             }
 
             onSuccess {
-                sendState {
+                modifyState {
                     isLoading = false
                     tasks = it.tasks.map(::TaskViewObject)
                 }
@@ -74,7 +74,7 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
                 error?.let { sendCommand(ToastCommand(it.toString())) }
                     ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
 
-                sendState { isLoading = false }
+                modifyState { isLoading = false }
             }
         }
     }
@@ -82,11 +82,11 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
     private fun getTaskList() {
         get<GetTaskListUseCase>().interact {
             onStart {
-                sendState { isLoading = true }
+                modifyState { isLoading = true }
             }
 
             onNext {
-                sendState {
+                modifyState {
                     isLoading = false
                     tasks = it.tasks.map(::TaskViewObject)
                 }
@@ -97,7 +97,7 @@ class TasksPresentationModel : BasePresentationModel<TasksViewController, TasksV
                 error?.let { sendCommand(ToastCommand(it.toString())) }
                     ?: run { sendCommand(ToastCommand(it.message.orEmpty())) }
 
-                sendState { isLoading = false }
+                modifyState { isLoading = false }
             }
         }
     }
