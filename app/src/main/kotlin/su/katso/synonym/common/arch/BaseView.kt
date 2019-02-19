@@ -9,7 +9,7 @@ import org.koin.standalone.KoinComponent
 
 abstract class BaseView(args: Bundle) : LifecycleController(args), KoinComponent {
     abstract val content: Int
-    abstract val presentationModel: BaseController<*, *>
+    abstract val controller: BaseController<*, *>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(content, container, false)

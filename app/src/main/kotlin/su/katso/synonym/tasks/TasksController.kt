@@ -1,7 +1,9 @@
 package su.katso.synonym.tasks
 
+import android.os.Bundle
 import org.koin.core.parameter.parametersOf
 import org.koin.standalone.get
+import su.katso.synonym.common.app.SynonymActivity
 import su.katso.synonym.common.arch.BaseController
 import su.katso.synonym.common.arch.ToastCommand
 import su.katso.synonym.common.entities.Task.Status
@@ -12,10 +14,16 @@ import su.katso.synonym.common.usecases.GetTaskListUseCase
 import su.katso.synonym.common.utils.getError
 import su.katso.synonym.tasks.adapter.TaskViewObject
 
-class TasksController : BaseController<TasksView, TasksModel>(TasksModel()) {
+class TasksController(
+    view: TasksView, private val arguments: Bundle = Bundle.EMPTY
+) : BaseController<TasksView, TasksModel>(view, TasksModel()) {
 
     override fun onFirstBind(view: TasksView) {
         getTaskList()
+
+        arguments.getString(SynonymActivity.EXTRA_URI)?.let {
+            sendCommand(ToastCommand(it))
+        }
     }
 
     override fun onBind(view: TasksView) {
@@ -28,7 +36,7 @@ class TasksController : BaseController<TasksView, TasksModel>(TasksModel()) {
         }
 
         bindTo(view.floatingButtonClicks()) {
-            createTask("magnet:?xt=urn:btih:9568f604d980b806612b463adce2e1b94b5fb503")
+            createTask("magnet")
         }
     }
 

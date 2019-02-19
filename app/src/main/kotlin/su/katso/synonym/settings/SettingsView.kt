@@ -8,8 +8,7 @@ import su.katso.synonym.common.arch.Command
 
 class SettingsView(args: Bundle = Bundle.EMPTY) : BaseView(args), SettingsContract.View {
     override val content: Int = R.layout.settings_view
-    override val presentationModel = SettingsController()
-        .also { it.bindToLifecycle(this) }
+    override val controller = SettingsController(this)
 
     override fun View.initView() {
     }

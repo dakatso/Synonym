@@ -2,7 +2,7 @@ package su.katso.synonym.settings
 
 import su.katso.synonym.common.arch.BaseController
 
-class SettingsController : BaseController<SettingsView, SettingsModel>(SettingsModel()) {
+class SettingsController(view: SettingsView) : BaseController<SettingsView, SettingsModel>(view, SettingsModel()) {
     override fun onBind(view: SettingsView) {
     }
 }

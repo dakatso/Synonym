@@ -1,7 +1,6 @@
 package su.katso.synonym.auth
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -16,7 +15,6 @@ import su.katso.synonym.common.arch.Command
 import su.katso.synonym.common.arch.HideKeyboardCommand
 import su.katso.synonym.common.arch.ToastCommand
 import su.katso.synonym.common.utils.hideKeyboard
-import su.katso.synonym.common.utils.klog
 import su.katso.synonym.common.utils.setError
 import su.katso.synonym.common.utils.text
 import su.katso.synonym.common.utils.textChanges
@@ -24,8 +22,7 @@ import su.katso.synonym.tasks.TasksView
 
 class AuthView(args: Bundle = Bundle.EMPTY) : BaseView(args), AuthContract.View {
     override val content = R.layout.auth_view
-    override val presentationModel = AuthController()
-        .also { it.bindToLifecycle(this) }
+    override val controller = AuthController(this, args)
 
     private lateinit var btnLogin: Button
     private lateinit var tilAddress: TextInputLayout
@@ -45,8 +42,6 @@ class AuthView(args: Bundle = Bundle.EMPTY) : BaseView(args), AuthContract.View 
     override fun editTextPasswordTextChanges() = tilPassword.textChanges()
 
     override fun render(model: AuthModel) {
-        klog(Log.DEBUG, model)
-
         tilAddress.setError(model.isAddressError)
         tilAccount.setError(model.isAccountError)
         tilPassword.setError(model.isPasswordError)
@@ -63,9 +58,8 @@ class AuthView(args: Bundle = Bundle.EMPTY) : BaseView(args), AuthContract.View 
                     Toast.makeText(it, command.text, Toast.LENGTH_SHORT).show()
                 }
             }
-            is OpenTasksCommand -> {
-                router.setRoot(RouterTransaction.with(TasksView()))
-            }
+
+            is OpenTasksCommand -> router.setRoot(RouterTransaction.with(TasksView(command.arguments)))
 
             is HideKeyboardCommand -> hideKeyboard()
 

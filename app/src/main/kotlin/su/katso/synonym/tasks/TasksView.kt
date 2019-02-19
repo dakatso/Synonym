@@ -21,8 +21,7 @@ import su.katso.synonym.tasks.adapter.TasksAdapter
 
 class TasksView(args: Bundle = Bundle.EMPTY) : BaseView(args), TasksContract.View {
     override val content: Int = R.layout.tasks_view
-    override val presentationModel = TasksController()
-        .also { it.bindToLifecycle(this) }
+    override val controller = TasksController(this, args)
 
     private lateinit var adapter: TasksAdapter
     private lateinit var progressBar: ProgressBar

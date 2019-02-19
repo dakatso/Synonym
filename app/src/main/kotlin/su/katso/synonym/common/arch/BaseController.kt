@@ -13,12 +13,12 @@ import io.reactivex.rxkotlin.withLatestFrom
 import io.reactivex.subjects.PublishSubject
 import org.koin.standalone.KoinComponent
 
-abstract class BaseController<V : MvcView<M>, M : MvcModel>(default: M) : MvcController, KoinComponent {
+abstract class BaseController<V : MvcView<M>, M : MvcModel>(view: V, default: M) : MvcController, KoinComponent {
 
     private val unBindDisposable = CompositeDisposable()
     private val onClearDisposable = CompositeDisposable()
 
-    private val state = ModelProxy(default)
+    private val model = ModelWrapper(default)
 
     private val commands = PublishSubject.create<Command>()
     private val valve = PublishSubject.create<Boolean>()
@@ -26,7 +26,7 @@ abstract class BaseController<V : MvcView<M>, M : MvcModel>(default: M) : MvcCon
 
     private var isFirstBind = true
 
-    fun bindToLifecycle(view: V) {
+    init {
         view.lifecycle.addObserver(object : LifecycleObserver {
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             private fun resume() = onBindController(view)
@@ -40,7 +40,7 @@ abstract class BaseController<V : MvcView<M>, M : MvcModel>(default: M) : MvcCon
     }
 
     private fun onBindController(view: V) {
-        state.subscribe { view.render(it) }
+        model.subscribe { view.render(it) }
             .addTo(unBindDisposable)
 
         commandsValve
@@ -65,7 +65,7 @@ abstract class BaseController<V : MvcView<M>, M : MvcModel>(default: M) : MvcCon
     private fun onCleared() {
         onClearDisposable.clear()
         valve.onComplete()
-        state.unSubscribe()
+        model.unSubscribe()
         commands.onComplete()
         onDestroy()
     }
@@ -79,9 +79,9 @@ abstract class BaseController<V : MvcView<M>, M : MvcModel>(default: M) : MvcCon
     }
 
     protected fun sendCommand(command: Command) = commands.onNext(command)
-    protected fun modifyState(modifier: M.() -> Unit) = state.modifyState(modifier, true)
-    protected fun modifyState(isNeedSend: Boolean, modifier: M.() -> Unit) = state.modifyState(modifier, isNeedSend)
-    protected val viewState: M get() = state.value
+    protected fun modifyState(modifier: M.() -> Unit) = model.modifyState(modifier, true)
+    protected fun modifyState(isNeedSend: Boolean, modifier: M.() -> Unit) = model.modifyState(modifier, isNeedSend)
+    protected val viewState: M get() = model.value
 
     protected fun <T> ObservableUseCase<T>.interact(apply: ObservableObserver<T>.() -> Unit) {
         onClearDisposable += subscribe(ObservableObserver<T>().apply(apply).build())

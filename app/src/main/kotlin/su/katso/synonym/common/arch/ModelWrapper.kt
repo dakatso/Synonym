@@ -4,7 +4,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 
-class ModelProxy<M : MvcModel>(default: M) {
+class ModelWrapper<M : MvcModel>(default: M) {
     var value: M = default
     private val publishSubject = PublishSubject.create<M>()
 

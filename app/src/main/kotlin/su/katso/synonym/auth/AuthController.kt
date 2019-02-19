@@ -1,5 +1,6 @@
 package su.katso.synonym.auth
 
+import android.os.Bundle
 import org.koin.core.parameter.parametersOf
 import org.koin.core.scope.Scope
 import org.koin.error.NoScopeFoundException
@@ -13,7 +14,9 @@ import su.katso.synonym.common.usecases.GetLoginParamsUseCase
 import su.katso.synonym.common.usecases.LoginUseCase
 import su.katso.synonym.common.utils.getError
 
-class AuthController : BaseController<AuthView, AuthModel>(AuthModel()) {
+class AuthController(
+    view: AuthView, private val arguments: Bundle = Bundle.EMPTY
+) : BaseController<AuthView, AuthModel>(view, AuthModel()) {
     private var session: Scope? = null
     private var loginUseCase: LoginUseCase? = null
 
@@ -60,7 +63,7 @@ class AuthController : BaseController<AuthView, AuthModel>(AuthModel()) {
                 loginUseCase = get { parametersOf(params) }
                 loginUseCase?.interact {
                     onComplete {
-                        sendCommand(OpenTasksCommand())
+                        sendCommand(OpenTasksCommand(arguments))
                     }
                     onError {
                         val error = it.getError()
@@ -91,7 +94,7 @@ class AuthController : BaseController<AuthView, AuthModel>(AuthModel()) {
         const val PREF_SID = "pref_sid"
     }
 
-    class OpenTasksCommand : Command
+    class OpenTasksCommand(val arguments: Bundle) : Command
     class FillInputsCommand(val loginParams: LoginParams) : Command
 
     class LoginParams(
